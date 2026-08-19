@@ -1,6 +1,6 @@
 # Dependencies - restored via npm install / forge install, never committed
 node_modules/
-lib/
+/lib/
 
 # Environment secrets - NEVER commit these, they hold real private keys
 .env
