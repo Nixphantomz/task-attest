@@ -1,0 +1,14 @@
+[profile.default]
+src = "contracts"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.24"
+optimizer = true
+optimizer_runs = 200
+
+[rpc_endpoints]
+xlayer_testnet = "${XLAYER_TESTNET_RPC}"
+xlayer_mainnet = "${XLAYER_MAINNET_RPC}"
+
+# Fill these in once confirmed via X Layer Builder Hub / dev docs.
+# Network info: https://web3.okx.com/onchainos/dev-docs/xlayer/developer/build-on-xlayer/network-information

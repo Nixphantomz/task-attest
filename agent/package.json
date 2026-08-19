@@ -1,0 +1,15 @@
+{
+  "name": "task-attest-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Off-chain AI agent: watches TaskAttest for delivered work, scores it against the spec via OpenRouter, publishes the attestation on-chain.",
+  "scripts": {
+    "start": "node src/index.js",
+    "once": "node src/index.js --once"
+  },
+  "dependencies": {
+    "ethers": "^6.13.4",
+    "dotenv": "^16.4.5"
+  }
+}

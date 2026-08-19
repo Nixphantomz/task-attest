@@ -1,0 +1,16 @@
+{
+  "name": "task-attest-deploy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Plain ethers.js deployment scripts for TaskAttest on X Layer. Deploys from the compiled Foundry artifact in ../out. No Remix, no Hardhat, no Foundry runtime needed.",
+  "scripts": {
+    "deploy": "node deploy.js",
+    "grant": "node grantRole.js",
+    "create-task": "node createTask.js"
+  },
+  "dependencies": {
+    "ethers": "^6.13.4",
+    "dotenv": "^16.4.5"
+  }
+}
