@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Hero } from "@/components/Hero";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { StatsBar } from "@/components/StatsBar";
 import { CreateTask } from "@/components/CreateTask";
 import { SubmitDeliverable } from "@/components/SubmitDeliverable";
 import { TaskList } from "@/components/TaskList";
@@ -38,6 +39,8 @@ export default function Home() {
             <span className="mono">NEXT_PUBLIC_CONTRACT_ADDRESS</span> in the frontend env and redeploy.
           </div>
         )}
+
+        <StatsBar />
 
         <div className="grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
           <CreateTask onDone={refresh} />

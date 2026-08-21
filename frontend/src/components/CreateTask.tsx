@@ -6,13 +6,26 @@ import { parseUnits } from "viem";
 import { TASK_ATTEST_ABI, ERC20_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
 import { USDC_ADDRESS, USDC_DECIMALS } from "@/lib/chains";
 
+async function pinText(text: string, filename: string): Promise<string> {
+  const res = await fetch("/api/pin-text", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, filename }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Pinning failed: ${res.status}`);
+  return data.uri as string;
+}
+
 export function CreateTask({ onDone }: { onDone: () => void }) {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const publicClient = usePublicClient();
   const { writeContractAsync } = useWriteContract();
 
-  const [specURI, setSpecURI] = useState("");
+  const [mode, setMode] = useState<"write" | "url">("write");
+  const [specText, setSpecText] = useState("");
+  const [specURL, setSpecURL] = useState("");
   const [reward, setReward] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
@@ -24,7 +37,6 @@ export function CreateTask({ onDone }: { onDone: () => void }) {
     if (!isConnected || !address) return setMsg({ kind: "err", text: "Connect your wallet first." });
     if (!CONTRACT_ADDRESS) return setMsg({ kind: "err", text: "Contract address not configured." });
     if (!usdc) return setMsg({ kind: "err", text: `No USDC address known for chain ${chainId}.` });
-    if (!specURI.trim()) return setMsg({ kind: "err", text: "Spec URI is required." });
     if (!reward || Number(reward) <= 0) return setMsg({ kind: "err", text: "Reward must be > 0." });
 
     const amount = parseUnits(reward, USDC_DECIMALS);
@@ -32,7 +44,22 @@ export function CreateTask({ onDone }: { onDone: () => void }) {
     try {
       setBusy(true);
 
-      // 1) approve if needed
+      let specURI: string;
+      if (mode === "write") {
+        if (!specText.trim()) {
+          setBusy(false);
+          return setMsg({ kind: "err", text: "Write the task spec first." });
+        }
+        setMsg({ kind: "ok", text: "Pinning spec to IPFS…" });
+        specURI = await pinText(specText.trim(), "spec.txt");
+      } else {
+        if (!specURL.trim()) {
+          setBusy(false);
+          return setMsg({ kind: "err", text: "Spec URL is required." });
+        }
+        specURI = specURL.trim();
+      }
+
       const allowance = (await publicClient!.readContract({
         address: usdc,
         abi: ERC20_ABI,
@@ -51,18 +78,18 @@ export function CreateTask({ onDone }: { onDone: () => void }) {
         await publicClient!.waitForTransactionReceipt({ hash: approveHash });
       }
 
-      // 2) createTask
       setMsg({ kind: "ok", text: "Creating task…" });
       const hash = await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: TASK_ATTEST_ABI,
         functionName: "createTask",
-        args: [specURI.trim(), amount],
+        args: [specURI, amount],
       });
       await publicClient!.waitForTransactionReceipt({ hash });
 
       setMsg({ kind: "ok", text: "Task created!" });
-      setSpecURI("");
+      setSpecText("");
+      setSpecURL("");
       setReward("");
       onDone();
     } catch (err) {
@@ -75,12 +102,37 @@ export function CreateTask({ onDone }: { onDone: () => void }) {
   return (
     <div className="card">
       <h2>Post a task</h2>
-      <label>Spec URI (hosted text/JSON describing the work — a Gist raw URL works)</label>
-      <input
-        placeholder="https://gist.githubusercontent.com/.../raw/spec.txt"
-        value={specURI}
-        onChange={(e) => setSpecURI(e.target.value)}
-      />
+
+      <div className="mode-toggle">
+        <button type="button" className={mode === "write" ? "mode-active" : "mode-inactive"} onClick={() => setMode("write")}>
+          Write it
+        </button>
+        <button type="button" className={mode === "url" ? "mode-active" : "mode-inactive"} onClick={() => setMode("url")}>
+          Paste a URL
+        </button>
+      </div>
+
+      {mode === "write" ? (
+        <>
+          <label>Describe the task</label>
+          <textarea
+            placeholder="e.g. Write a 2-3 sentence product description for an insulated water bottle..."
+            value={specText}
+            onChange={(e) => setSpecText(e.target.value)}
+            rows={4}
+          />
+        </>
+      ) : (
+        <>
+          <label>Spec URI (hosted text/JSON describing the work)</label>
+          <input
+            placeholder="https://gist.githubusercontent.com/.../raw/spec.txt"
+            value={specURL}
+            onChange={(e) => setSpecURL(e.target.value)}
+          />
+        </>
+      )}
+
       <label>Reward (USDC)</label>
       <input placeholder="5" value={reward} onChange={(e) => setReward(e.target.value)} inputMode="decimal" />
       <button onClick={submit} disabled={busy || !isConnected}>

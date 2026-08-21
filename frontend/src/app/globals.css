@@ -496,3 +496,82 @@ button.secondary:hover:not(:disabled) {
   font-size: 13px;
   margin-bottom: 20px;
 }
+
+/* ============================================================
+   Stats bar - read-only aggregates from on-chain task data
+   ============================================================ */
+
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.stat {
+  background: var(--bg-elevated);
+  padding: 16px 14px;
+  text-align: center;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stat-label {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ============================================================
+   Write/URL mode toggle (Create Task, Submit Deliverable)
+   ============================================================ */
+
+.mode-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 14px 0 0;
+  width: fit-content;
+}
+
+.mode-toggle button {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.mode-toggle button.mode-active {
+  background: var(--white-fill);
+  color: var(--white-fill-text);
+}
+
+.mode-toggle button.mode-inactive {
+  background: var(--bg-elevated-2);
+  color: var(--text-muted);
+}
+
+.mode-toggle button.mode-inactive:hover:not(:disabled) {
+  background: var(--bg-elevated);
+  opacity: 1;
+}
